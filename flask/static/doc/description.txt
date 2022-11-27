@@ -1,0 +1,3 @@
+The Home Automation API was created to facilitate the development of custom smart home devices. This tool is not intended for widespread use in its current state. 
+11/21/22
+Tom
