@@ -162,8 +162,8 @@ def clear_credentials():
 @app.route('/api', methods=['POST'])
 def api():
     with open("/Users/tomotero/Projects/web/HomeAutomationAPI/api_note", "a") as f:
-        f.writeline("Controlling Desk Lamp! WEEEEEE")
-    requests.get(url = "192.168.1.8/motor_test")
+        f.write("Controlling Desk Lamp! WEEEEEE")
+    requests.get(url = "http://192.168.1.8/motor_test")
     return ("Controlling Desk Lamp! WEEEEEE")
 
 def credentials_to_dict(credentials):
