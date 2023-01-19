@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import flask
 import requests
 import re
 
@@ -9,28 +8,52 @@ import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 
+# Internal imports
+from db import init_db_command
+from user import User
+
+import flask
+from flask_login import (
+    LoginManager,
+    current_user,
+    login_required,
+    login_user,
+    logout_user,
+)
+
+
 DEBUG = True
 
-# This variable specifies the name of a file that contains the OAuth 2.0
-# information for this application, including its client_id and client_secret.
-CLIENT_SECRETS_FILE = "secret/client_secret.json"
 
+# Configuration
+CLIENT_SECRETS_FILE = "secret/client_secret.json"
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
+GOOGLE_DISCOVERY_URL = (
+    "https://accounts.google.com/.well-known/openid-configuration"
+)
 # This OAuth 2.0 access scope allows for full read/write access to the
 # authenticated user's account and requires requests to use an SSL connection.
-SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
+SCOPES = ["https://www.googleapis.com/auth/userinfo.email", "openid", "https://www.googleapis.com/auth/userinfo.profile"]
 API_SERVICE_NAME = 'drive'
 API_VERSION = 'v2'
 
+
+# Flask app setup
 app = flask.Flask(__name__)
 # Note: A secret key is included in the sample so that it works.
 # If you use this code in your application, replace this with a truly secret
 # key. See https://flask.palletsprojects.com/quickstart/#sessions.
-app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
+
+
 SERVER_NAME = 'www.homeautomationapi.tk'
 url_pat = 'https?://[a-z0-9,.]*/'
 
 @app.route('/')
 def index():
+  if 'credentials' not in flask.session:
+    return flask.redirect('authorize')
   return print_index_table()
 
 
@@ -66,7 +89,7 @@ def authorize():
   # for the OAuth 2.0 client, which you configured in the API Console. If this
   # value doesn't match an authorized URI, you will get a 'redirect_uri_mismatch'
   # error.
-  # flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
+  flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
   
   if DEBUG:
     print("######### @app.route('/authorize') ################")
@@ -76,7 +99,7 @@ def authorize():
   # if DEBUG:
   #   print(f"[DEBUG] path {path}")
   # flow.redirect_uri = f"{path}oauth2callback"
-  flow.redirect_uri = "https://www.homeautomationapi.tk/oauth2callback"
+  # flow.redirect_uri = "https://www.homeautomationapi.tk/oauth2callback"
   if DEBUG:
     print(f"[DEBUG] {flow.redirect_uri}")
 
@@ -110,7 +133,7 @@ def oauth2callback():
   # if DEBUG:
   #   print(f"[DEBUG] path {path}")
   # flow.redirect_uri = f"{path}oauth2callback"
-  flow.redirect_uri = "https://www.homeautomationapi.tk/oauth2callback"
+  # flow.redirect_uri = "https://www.homeautomationapi.tk/oauth2callback"
   if DEBUG:
     print(f"[DEBUG] flow.redirect_uri: {flow.redirect_uri}")
 
@@ -129,7 +152,7 @@ def oauth2callback():
   credentials = flow.credentials
   flask.session['credentials'] = credentials_to_dict(credentials)
 
-  return flask.redirect(flask.url_for('api'))
+  return flask.redirect(flask.url_for('index'))
 
 
 @app.route('/revoke')
@@ -159,12 +182,13 @@ def clear_credentials():
   return ('Credentials have been cleared.<br><br>' +
           print_index_table())
 
-@app.route('/api', methods=['POST'])
+@app.route('/api', methods=['POST', 'GET'])
 def api():
-    with open("/Users/tomotero/Projects/web/HomeAutomationAPI/api_note", "a") as f:
-        f.write("Controlling Desk Lamp! WEEEEEE")
-    requests.get(url = "http://192.168.1.8/motor_test")
+    # with open("/Users/tomotero/Projects/web/HomeAutomationAPI/api_note", "a") as f:
+    #     f.write("Controlling Desk Lamp! WEEEEEE")
+    # requests.get(url = "http://192.168.1.8/motor_test")
     return ("Controlling Desk Lamp! WEEEEEE")
+
 
 def credentials_to_dict(credentials):
   return {'token': credentials.token,
@@ -204,4 +228,4 @@ if __name__ == '__main__':
 
   # Specify a hostname and port that are set as a valid redirect URI
   # for your API project in the Google API Console.
-  app.run('127.0.0.1', 8080, debug=True)
+  app.run('127.0.0.1', 5000, debug=True, ssl_context=("C:\certs\certificate.pem", "C:\certs\key.pem"))
