@@ -1,0 +1,140 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background-color: rgb(220, 220, 220);
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* The grid container */
+.grid-container {
+  display: grid;
+  grid-template-areas:
+    'header'
+    'mid'
+    'footer';
+  grid-template-rows: 15vh 75vh 10vh
+}
+
+/* Style the header */
+.header {
+  grid-area: header;
+  background-color: #f1f1f1;
+  padding: 30px;
+  text-align: center;
+  font-size: 35px;
+}
+
+
+/* Style the mid column */
+.mid {
+  grid-area: mid;
+  background-color: #bbb;
+  padding: 10px;
+  display: grid;
+  grid-template-areas:
+    'mid-header'
+    'desk-lamp-btn-group';
+  grid-template-rows: 10vh 65vh
+}
+
+.mid .mid-header {
+  grid-area: mid-header;
+  overflow: auto;
+  text-align: center;
+}
+.mid .desk-lamp-btn-group {
+  grid-area: desk-lamp-btn-group;
+  overflow: auto;
+  text-align: center;
+}
+.mid .desk-lamp-btn-group button {
+  width: 25%;
+  background-color: #04AA6D; /* Green background */
+  border: 1px solid green; /* Green border */
+  color: white; /* White text */
+  padding: 10px 24px; /* Some padding */
+  cursor: pointer; /* Pointer/hand icon */
+  float: left; 
+}
+
+.mid .desk-lamp-btn-grou button:not(:last-child) {
+  border-right: none; /* Prevent double borders */
+}
+
+.mid .desk-lamp-btn-group:after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.mid .desk-lamp-btn-group button:hover {
+  background-color: #3e8e41;
+}
+
+
+.right {
+  grid-area: right;
+}
+
+/* Style the footer */
+.footer {
+  grid-area: footer;
+  height: 1fr;
+  background-color: #f1f1f1;
+  padding: 10px;
+  text-align: center;
+}
+
+/* Responsive layout - makes the three columns stack on top of each other instead of next to each other */
+@media (max-width: 600px) {
+  .grid-container {
+    grid-template-areas:
+      'header'
+      'mid'
+      'footer';
+    grid-template-rows: auto auto auto
+  }
+
+  .mid {
+    grid-template-columns: auto;
+    grid-template-areas:
+      'mid-header'
+      'desk-lamp-btn-group';
+  }
+}
+
+ul {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+}
+
+li {
+  float: left;
+}
+
+li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+li a:hover {
+  background-color: #111;
+}

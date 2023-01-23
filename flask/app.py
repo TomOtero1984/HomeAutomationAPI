@@ -9,10 +9,6 @@ import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 
-# Internal imports
-from db import init_db_command
-from user import User
-
 import flask
 from flask_login import (
     LoginManager,
@@ -21,6 +17,7 @@ from flask_login import (
     login_user,
     logout_user,
 )
+from flask_cors import CORS
 
 
 DEBUG = True
@@ -45,10 +42,18 @@ API_VERSION = 'v2'
 # Flask app setup
 app = flask.Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
+CORS(app, resources=r'https://192.168.1.93:5443/*')
 
 
 SERVER_NAME = 'www.homeautomationapi.tk'
 url_pat = 'https?://[a-z0-9,.]*/'
+
+
+def check_credentials():
+  if 'credentials' not in flask.session:
+    return flask.redirect("https://www.homeautomationapi.tk/authorize")
+  return True
+
 
 @app.route('/')
 def index():
@@ -145,31 +150,61 @@ def clear_credentials():
 
 @app.route('/api', methods=['POST', 'GET'])
 def api():
+  dir(flask.request)
   if 'credentials' not in flask.session:
-      return flask.redirect("https://www.homeautomationapi.tk/authorize")
-    # with open("/Users/tomotero/Projects/web/HomeAutomationAPI/api_note", "a") as f:
-    #     f.write("Controlling Desk Lamp! WEEEEEE")
-    # requests.get(url = "http://192.168.1.8/motor_test")
+    return flask.redirect("https://www.homeautomationapi.tk/authorize")
+  api_end = flask.request.args.get('api')
+  api_com = flask.request.args.get('command')
+  if api_end:
+    print(f"[DEBUG] api_end: {api_end}")
+    if api_com:
+      print(f"[DEBUG] api_com: {api_com}")      
+      resp = requests.get(url=f"http://192.168.1.93:5000/{api_com}")
+      print(f"[DEBUG] resp: {resp}")
+    return ({"api_end": api_end, "api_com": api_com})
+  
   return flask.render_template('api.html')
+
+
+@app.route('/api/desklamp/power', methods=['GET'])
+def api_desklamp_power():
+  if 'credentials' not in flask.session:
+    return flask.redirect("https://www.homeautomationapi.tk/authorize")
+  return("/api/desklamp/power")
+
+
+@app.route('/api/desklamp/hue', methods=['GET'])
+def api_desklamp_hue():
+  if 'credentials' not in flask.session:
+    return flask.redirect("https://www.homeautomationapi.tk/authorize")
+  return("/api/desklamp/hue")
+
+
+@app.route('/api/desklamp/brighter', methods=['GET'])
+def api_desklamp_brighter():
+  if 'credentials' not in flask.session:
+    return flask.redirect("https://www.homeautomationapi.tk/authorize")
+  return("/api/desklamp/brighter")
+
+
+@app.route('/api/desklamp/dimmer', methods=['GET'])
+def api_desklamp_dimmer():
+  if 'credentials' not in flask.session:
+    return flask.redirect("https://www.homeautomationapi.tk/authorize")
+  return("/api/desklamp/dimmer")
 
 
 @app.route('/contact', methods=['GET'])
 def contact():
   if 'credentials' not in flask.session:
-      return flask.redirect("https://www.homeautomationapi.tk/authorize")
-    # with open("/Users/tomotero/Projects/web/HomeAutomationAPI/api_note", "a") as f:
-    #     f.write("Controlling Desk Lamp! WEEEEEE")
-    # requests.get(url = "http://192.168.1.8/motor_test")
+    return flask.redirect("https://www.homeautomationapi.tk/authorize")
   return flask.render_template('contact.html')
 
 
 @app.route('/about', methods=['GET'])
 def about():
   if 'credentials' not in flask.session:
-      return flask.redirect("https://www.homeautomationapi.tk/authorize")
-    # with open("/Users/tomotero/Projects/web/HomeAutomationAPI/api_note", "a") as f:
-    #     f.write("Controlling Desk Lamp! WEEEEEE")
-    # requests.get(url = "http://192.168.1.8/motor_test")
+    return flask.redirect("https://www.homeautomationapi.tk/authorize")
   return flask.render_template('about.html')
 
 

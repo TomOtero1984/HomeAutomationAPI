@@ -6,8 +6,9 @@
     <title>DesktopLampAPI</title>
     <meta name="description" content="An API for a Desktop Lamp">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/static/index.css">
+    <link rel="stylesheet" href="/static/css/api.css">
     <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <script src="/static/js/api.js"></script>
   </head>
   <body>
     <ul>
@@ -22,8 +23,18 @@
         <h2>Home Automation API</h2>
       </div>
 
-      <div class="middle">
-        <h1>API PAGE</h1>
+      <div class="mid">
+        <div class="mid-header">
+          <h1>API Commands</h1>
+        </div>
+        
+        <div class="desk-lamp-btn-group">
+          <h3 class="desk-lamp-buttons"> Desk Lamp Commands</h3>        
+          <button onclick="power_click()">Power</button>
+          <button onclick="hue_click()">Hue</button>
+          <button onclick="brighter_click()">Brighter</button>
+          <button onclick="dimmer_click()">Dimmer</button>
+        </div>
       </div>  
       
       <div class="footer">

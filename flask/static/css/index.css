@@ -11,7 +11,17 @@
   body {
     font-family: Arial, Helvetica, sans-serif;
   }
-  
+
+  /* The grid container */
+  .grid-container {
+    display: grid;
+    grid-template-areas: 
+      'header' 
+      'mid' 
+      'footer';
+    grid-template-rows: 15vh 75vh 10vh
+  }
+
   /* Style the header */
   .header {
     grid-area: header;
@@ -21,45 +31,34 @@
     font-size: 35px;
   }
   
-  /* The grid container */
-  .grid-container {
-    display: grid;
-    grid-template-areas: 
-      'header' 
-      'middle' 
-      'footer';
-    /* grid-column-gap: 10px; - if you want gap between the columns */
-  }
-
- /* Style the middle column */
-  .middle {
+ /* Style the mid column */
+  .mid {
+    grid-area: mid;
     background-color:#bbb;
-    padding: 10px;
-    height: 75vh;  
-    grid-area: middle;
+    padding: 10px; 
     display: grid;
-    grid-template-columns: 50% 50%;
     grid-template-areas: 
       'description setup';
+    grid-template-columns: 50% 50%;
   }
 
-  .middle .description {
+  .mid .description {
     grid-area: description;
     overflow: auto;
   }
-  .middle .description .main {
+  .mid .description .main {
     margin-bottom: 4px;
     padding: 0;
     text-align: left;
   }
-  .middle .description .signature {
+  .mid .description .signature {
     margin: 0;
     padding: 0;
     color:darkslategray;
     font-size: smaller;
   }
 
-  .middle .setup {
+  .mid .setup {
     grid-area: setup;
   }
 
@@ -80,14 +79,15 @@
     .grid-container  {
       grid-template-areas: 
         'header'
-        'middle'
+        'mid'
         'footer';
+      grid-template-rows: auto auto auto
     }
-    .middle {
-      grid-template-columns: auto;
+    .mid {
       grid-template-areas: 
         'description'
         'setup';
+      grid-template-columns: auto;
     }
   }
 
