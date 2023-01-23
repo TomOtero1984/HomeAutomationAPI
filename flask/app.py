@@ -3,6 +3,7 @@
 import os
 import requests
 import re
+import json
 
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
@@ -27,23 +28,22 @@ DEBUG = True
 
 # Configuration
 CLIENT_SECRETS_FILE = "secret/client_secret.json"
-GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
-GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
+with open(CLIENT_SECRETS_FILE) as f:
+  _CLIENT_SECRETS_JSON = json.load(f)
+GOOGLE_CLIENT_ID = _CLIENT_SECRETS_JSON['web']['client_id']
+GOOGLE_CLIENT_SECRET = _CLIENT_SECRETS_JSON['web']['client_secret']
 GOOGLE_DISCOVERY_URL = (
     "https://accounts.google.com/.well-known/openid-configuration"
 )
 # This OAuth 2.0 access scope allows for full read/write access to the
 # authenticated user's account and requires requests to use an SSL connection.
-SCOPES = ["https://www.googleapis.com/auth/userinfo.email", "openid", "https://www.googleapis.com/auth/userinfo.profile"]
+SCOPES = ["https://www.googleapis.com/auth/userinfo.email", "openid", "https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/drive.metadata"]
 API_SERVICE_NAME = 'drive'
 API_VERSION = 'v2'
 
 
 # Flask app setup
 app = flask.Flask(__name__)
-# Note: A secret key is included in the sample so that it works.
-# If you use this code in your application, replace this with a truly secret
-# key. See https://flask.palletsprojects.com/quickstart/#sessions.
 app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
 
 
@@ -53,14 +53,14 @@ url_pat = 'https?://[a-z0-9,.]*/'
 @app.route('/')
 def index():
   if 'credentials' not in flask.session:
-    return flask.redirect('authorize')
+    return flask.redirect("https://www.homeautomationapi.tk/authorize")
   return print_index_table()
 
 
 @app.route('/test')
 def test_api_request():
   if 'credentials' not in flask.session:
-    return flask.redirect('authorize')
+    return flask.redirect("https://www.homeautomationapi.tk/authorize")
 
   # Load credentials from the session.
   credentials = google.oauth2.credentials.Credentials(
@@ -89,18 +89,13 @@ def authorize():
   # for the OAuth 2.0 client, which you configured in the API Console. If this
   # value doesn't match an authorized URI, you will get a 'redirect_uri_mismatch'
   # error.
-  flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
-  
+  # flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
+  flow.redirect_uri = "https://www.homeautomationapi.tk/oauth2callback"
+
   if DEBUG:
     print("######### @app.route('/authorize') ################")
+    print(f"[DEBUG] flow: {flow}")
     print(f"[DEBUG] flask.request.environ: {flask.request.environ}")
-  #   print(f"[DEBUG] HTTP_REFERER: {flask.request.environ['HTTP_REFERER']}")
-  # path = re.match(url_pat,flask.request.environ['HTTP_REFERER']).group()
-  # if DEBUG:
-  #   print(f"[DEBUG] path {path}")
-  # flow.redirect_uri = f"{path}oauth2callback"
-  # flow.redirect_uri = "https://www.homeautomationapi.tk/oauth2callback"
-  if DEBUG:
     print(f"[DEBUG] {flow.redirect_uri}")
 
   authorization_url, state = flow.authorization_url(
@@ -123,27 +118,21 @@ def oauth2callback():
 
   flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
       CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
-  flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
+  # flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
+  flow.redirect_uri = "https://www.homeautomationapi.tk/oauth2callback"
+
 
   if DEBUG:
     print("######### @app.route('/oauth2callback') ################")
-    print(f"[DEBUG] {flask.request.environ}")
-  #   print(f"[DEBUG] HTTP_REFERER: {flask.request.environ['HTTP_REFERER']}")
-  # path = re.match(url_pat,flask.request.environ['HTTP_REFERER']).group()
-  # if DEBUG:
-  #   print(f"[DEBUG] path {path}")
-  # flow.redirect_uri = f"{path}oauth2callback"
-  # flow.redirect_uri = "https://www.homeautomationapi.tk/oauth2callback"
-  if DEBUG:
     print(f"[DEBUG] flow.redirect_uri: {flow.redirect_uri}")
 
   # Use the authorization server's response to fetch the OAuth 2.0 tokens.
   authorization_response = flask.request.url
   if "http:" in authorization_response:
     authorization_response = authorization_response.replace("http:","https:") 
-
   if DEBUG:
     print(f"[DEBUG] authorization_response: {authorization_response}")
+
   flow.fetch_token(authorization_response=authorization_response)
 
   # Store credentials in the session.
@@ -152,7 +141,7 @@ def oauth2callback():
   credentials = flow.credentials
   flask.session['credentials'] = credentials_to_dict(credentials)
 
-  return flask.redirect(flask.url_for('index'))
+  return flask.redirect("https://www.homeautomationapi.tk/")
 
 
 @app.route('/revoke')
@@ -184,10 +173,12 @@ def clear_credentials():
 
 @app.route('/api', methods=['POST', 'GET'])
 def api():
+  if 'credentials' not in flask.session:
+      return flask.redirect("https://www.homeautomationapi.tk/authorize")
     # with open("/Users/tomotero/Projects/web/HomeAutomationAPI/api_note", "a") as f:
     #     f.write("Controlling Desk Lamp! WEEEEEE")
     # requests.get(url = "http://192.168.1.8/motor_test")
-    return ("Controlling Desk Lamp! WEEEEEE")
+  return ("Controlling Desk Lamp! WEEEEEE")
 
 
 def credentials_to_dict(credentials):
